@@ -1,7 +1,7 @@
 import logging
 import plivoxml
 from base import BaseHandler
-from main import db_helper
+# from main import db_helper
 
 log = logging.getLogger(__name__)
 

@@ -28,5 +28,5 @@ class DBHelper(object):
     def save_inbound_call_details(self):
         pass
 
-    def save_agent_login(self):
+    def save_agent_login(self, params):
         pass
