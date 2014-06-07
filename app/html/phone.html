@@ -9,25 +9,58 @@
 
 				};
 				Plivo.onReady = function(){
-					Plivo.conn.login("vavagent1140607083814", "billy123");
+					
+				};
+
+				Plivo.onIncomingCall = function(callerName, extraHeaders) {
+					console.log("Incoming call from "+callerName);
+					$("#info").append("Incoming call from "+callerName+" <br/>");
 				};
 				Plivo.onLogin = function() {
 					console.log("Login success");
-					Plivo.conn.onIncomingCall = function(callerName, extraHeaders) {
-						$("#info").append("Incoming call from "+callerName+" <br/>");
-						Plivo.conn.answer();
-						$("#info").append("Answered the call <br/>");
-						setTimeout(function(){
-							Plivo.conn.hangup();
-							$("#info").append("Hungup the call <br/>");
-						},5000);
-					};
 				};
+				
 				Plivo.init();
 			});
+			function login() {
+					Plivo.conn.login($("#username").val(), $("#password").val());
+					data = {
+						Id: $("#username").val()
+					};
+					$.post("/agent", data, function(resp){
+						console.log(resp);
+					});
+				}
+
+				function logout() {
+					Plivo.conn.logout();
+					$.ajax({
+							type: "DELETE",
+							url: "/agent/"+$("#username").val(),
+							success: function(){
+							console.log("Success");
+						}
+					});
+				}
+
+				function answer() {
+					$("#info").append("Answered the call <br/>");
+					Plivo.conn.answer();
+				}
+
+				function hangup() {
+					$("#info").append("Hungup the call <br/>");
+					Plivo.conn.hangup();
+				}
 		</script>
 	</head>
 	<body>
+		Username: <input type="text" id="username" value="vavagent1140607083814"/> <br />
+		Password: <input type="password" id="password" value="billy123"/> <br />
+		<button onclick="login()">Login</button>
+		<button onclick="logout()">Logout</button>
+		<button onclick="answer()">Answer</button>
+		<button onclick="hangup()">Hangup</button>
 		<div id="info"></div>
 	</body>
 </html>

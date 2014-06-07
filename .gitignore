@@ -1,2 +1,3 @@
 plivo/
 .idea
+*.pyc
