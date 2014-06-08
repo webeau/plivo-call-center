@@ -23,38 +23,44 @@
 				Plivo.init();
 			});
 			function login() {
-					Plivo.conn.login($("#username").val(), $("#password").val());
-					data = {
-						Id: $("#username").val()
-					};
-					$.post("/agent", data, function(resp){
-						console.log(resp);
-					});
-				}
+				Plivo.conn.login($("#username").val(), $("#password").val());
+				data = {
+					Id: $("#username").val()
+				};
+				$.post("/agent", data, function(resp){
+					console.log(resp);
+				});
+			}
 
-				function logout() {
-					Plivo.conn.logout();
-					$.ajax({
-							type: "DELETE",
-							url: "/agent/"+$("#username").val(),
-							success: function(){
-							console.log("Success");
-						}
-					});
-				}
+			function logout() {
+				Plivo.conn.logout();
+				$.ajax({
+						type: "DELETE",
+						url: "/agent/"+$("#username").val(),
+						success: function(){
+						console.log("Success");
+					}
+				});
+			}
 
-				function answer() {
-					$("#info").append("Answered the call <br/>");
-					Plivo.conn.answer();
-				}
+			function answer() {
+				$("#info").append("Answered the call <br/>");
+				Plivo.conn.answer();
+			}
 
-				function hangup() {
-					$("#info").append("Hungup the call <br/>");
-					Plivo.conn.hangup();
-				}
+			function hangup() {
+				$("#info").append("Hungup the call <br/>");
+				Plivo.conn.hangup();
+			}
+			setInterval(function(){
+				$.get("/calls/active/count",function(data){
+					$("#inQueue").html(data.count);
+				});
+			},3000);
 		</script>
 	</head>
 	<body>
+		<h1 id="inQueue">0</h1><br/>
 		Username: <input type="text" id="username" value="vavagent1140607083814"/> <br />
 		Password: <input type="password" id="password" value="billy123"/> <br />
 		<button onclick="login()">Login</button>

@@ -31,6 +31,7 @@ class RoutingHandler(BaseHandler):
             db_helper.session.commit()
 
             request_params.update({"Agent":agent.Id})
+
             dial_params = dict(callerId=self.request.params.get("CallerName"))
             response.addDial(**dial_params).addUser("sip:"+agent.Id+"@phone.plivo.com")
         else:
@@ -47,27 +48,21 @@ class RoutingHandler(BaseHandler):
         try:
             call = db_helper.get_call_by_id(self.request.params.get("CallUUID"))
             call.IsCompleted = True
-            db_helper.session.commit()
 
-            agent_id = call.Agent
+            agent = db_helper.get_agent_by_id(call.Agent)
+            agent.OnCall = False
+
+            db_helper.session.commit()
         except NoResultFound:
             log.error("Thats no good. Where did "+self.request.params.get("CallUUID")+" go?")
-            return
 
-
-        agent = db_helper.get_agent_by_id(agent_id)
-        agent.OnCall = False
 
         call = db_helper.get_call_from_queue()
         if call:
-            log.info(call.to_dict())
-            call.Agent = agent_id
             params = dict(aleg_url="https://go-for-plivo.appspot.com/route", aleg_method="POST")
             response = plivo.RestAPI("MAMWQ3MJCWMJI0ZME5MD","ZDNhYmZhY2U4NWRlNGY2MGI4MzMwZjQxZGZjZWJh").Call.transfer(call.Id, **params)
             log.info(response)
-        # else:
 
-        db_helper.session.commit()
 
     def message(self):
         log.info(self.request.params)

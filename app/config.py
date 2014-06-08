@@ -1,4 +1,4 @@
-# app_config = dict(DB_STRING="sqlite:///:memory:",
+# app_config = dict(DB_STRING="mysql://root@localhost/plivo",
 #                   DB_POOL_RECYCLE="3600",
 #                   DB_DEBUG=False)
 
