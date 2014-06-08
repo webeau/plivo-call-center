@@ -27,9 +27,6 @@ class RoutingHandler(BaseHandler):
 
         agent = db_helper.get_available_agent()
         if agent:
-            agent.OnCall = True
-            db_helper.session.commit()
-
             request_params.update({"Agent":agent.Id})
 
             dial_params = dict(callerId=self.request.params.get("CallerName"))
@@ -46,13 +43,7 @@ class RoutingHandler(BaseHandler):
 
     def end(self):
         try:
-            call = db_helper.get_call_by_id(self.request.params.get("CallUUID"))
-            call.IsCompleted = True
-
-            agent = db_helper.get_agent_by_id(call.Agent)
-            agent.OnCall = False
-
-            db_helper.session.commit()
+            db_helper.call_completed(self.request.params.get("CallUUID"))
         except NoResultFound:
             log.error("Thats no good. Where did "+self.request.params.get("CallUUID")+" go?")
 
@@ -75,12 +66,9 @@ class AgentHandler(BaseHandler):
         self.render_json(db_helper.agent_login(self.request.params))
         call = db_helper.get_call_from_queue()
         if call:
-            call.Agent = self.request.params.get("Id")
             params = dict(aleg_url="https://go-for-plivo.appspot.com/route", aleg_method="POST")
             response = plivo.RestAPI("MAMWQ3MJCWMJI0ZME5MD","ZDNhYmZhY2U4NWRlNGY2MGI4MzMwZjQxZGZjZWJh").Call.transfer(call.Id, **params)
             log.info(response)
-        db_helper.session.commit()
-
 
     def delete(self, id):
         db_helper.agent_logout(id)

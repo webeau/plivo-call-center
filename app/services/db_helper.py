@@ -31,19 +31,20 @@ class DBHelper(object):
     def save_inbound_call_details(self, params):
         call = self.session.query(CallQueue).filter_by(Id=params.get("CallUUID")).first()
         if call is not None:
-            return
-        call = CallQueue()
-        call.Id = params.get("CallUUID")
-        call.Direction = params.get("Direction")
-        call.From = params.get("From")
-        call.CallerName = params.get("CallerName")
-        call.BillRate = params.get("BillRate")
-        call.To = params.get("To")
-        call.CallStatus = params.get("CallStatus")
-        call.Event = params.get("Event")
-        call.Agent = params.get("Agent")
-        call.IsCompleted = False
-        self.session.add(call)
+            call.Agent = params.get("Agent")
+        else:
+            call = CallQueue()
+            call.Id = params.get("CallUUID")
+            call.Direction = params.get("Direction")
+            call.From = params.get("From")
+            call.CallerName = params.get("CallerName")
+            call.BillRate = params.get("BillRate")
+            call.To = params.get("To")
+            call.CallStatus = params.get("CallStatus")
+            call.Event = params.get("Event")
+            call.Agent = params.get("Agent")
+            call.IsCompleted = False
+            self.session.add(call)
         self.session.commit()
 
     def get_call_from_queue(self):
@@ -83,4 +84,17 @@ class DBHelper(object):
             self.session.commit()
 
     def get_available_agent(self):
-        return self.session.query(AgentPresence).filter_by(OnCall=False).first()
+        agent = self.session.query(AgentPresence).filter_by(OnCall=False).first()
+        if agent:
+            agent.OnCall = True
+            self.session.commit()
+        return agent
+
+    def call_completed(self, call_id):
+        call = self.get_call_by_id(call_id)
+        call.IsCompleted = True
+
+        agent = self.get_agent_by_id(call.Agent)
+        agent.OnCall = False
+
+        self.session.commit()
